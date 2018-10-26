@@ -14,7 +14,11 @@ class Bitrix{
         return $app_reg_url."/".$type_api."/".$id_user_webhook."/".$code_webhook."/".$method.".".$data_type_request;
     }
     
-    public function send($method, $queryData, $mes_success){
+    function url($app_reg_url, $type_api, $id_user_webhook, $code_webhook, $method, $data_type_request){
+        return $app_reg_url."/".$type_api."/".$id_user_webhook."/".$code_webhook."/".$method.".".$data_type_request;
+    }
+        
+    public function send($method, $queryData, $mes_success, $method_request){
         if( $curl = curl_init() ) {
             curl_setopt($curl, CURLOPT_URL, $this->url($this->app_reg_url, $this->type_api, $this->id_user_webhook, $this->code_webhook, $method, $this->data_type_request));
             curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
@@ -26,7 +30,9 @@ class Bitrix{
             curl_close($curl);
             if ($result != '') {
                 $this->notify($mes_success);
-                return json_decode($result);
+                $result = json_decode($result);
+                $result->method = $method_request;
+                return $result;
             }else{
                 return "Результат пусто";
             }
@@ -41,7 +47,7 @@ class Bitrix{
             'type' => 'SYSTEM'
         );
         if ($message !== ""){
-            return $this->send($method, $queryData, '');
+            return $this->send($method, $queryData, '','notify');
         }
     }
     
@@ -68,7 +74,7 @@ class Bitrix{
             ),
             'params' => array("REGISTER_SONET_EVENT" => "Y")
         );
-        return $this->send($method, $queryData, "Новая заявка на Арт-Строй");
+        return $this->send($method, $queryData, 'Новая заявка на Арт-Строй', 'add_lead');
     }
      
     public function update_user(){
@@ -80,7 +86,7 @@ class Bitrix{
             ),
             'params' => array("REGISTER_SONET_EVENT" => "Y")
         );
-        return $this->send($method, $queryData, "Обновились данные у заявки на Арт-Строй");
+        return $this->send($method, $queryData, 'Обновились данные у заявки на Арт-Строй', 'update_lead');
     }
 }
 
